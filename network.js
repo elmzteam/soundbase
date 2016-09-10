@@ -65,11 +65,11 @@ networkManager.prototype = {
 					if (trackSet.size >= num) return Promise.all(promises);
 					trackSet.add(fav[i].id);
 					let obj = {
-						id: fav[i].id,
-						stream_url: fav[i].stream_url,
-						artwork_url: fav[i].artwork_url,
-						title: fav[i].title,
-						description: fav[i].description, 
+						id: fav[i].id || 0,
+						stream_url: fav[i].stream_url || "",
+						artwork_url: fav[i].artwork_url || "",
+						title: fav[i].title || "",
+						description: fav[i].description || "", 
 					}
 					promises.push(that.db.songs.update({id: fav[i].id}, {$set: obj}, {upsert: true})
 					  .then(() => that.db.edges.findOne({songs: {$all: [track, fav[i].id]}, user: fav[i].user.id}))
