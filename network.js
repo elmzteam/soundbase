@@ -11,6 +11,7 @@ let networkManager = function(soundcloud, db) {
 
 networkManager.prototype = {
 	_dbSearch: function(num, track) {
+		track = parseInt(track)
 		return this.db.edges.find({
 			songs: track
 		}).limit(2*num)
@@ -31,6 +32,7 @@ networkManager.prototype = {
 		})
 	},
 	search: function (num, track) {
+		track = parseInt(track)
 		let cachedStore = {}
 		const that = this
 		const users = Math.ceil(Math.sqrt(num*2));
