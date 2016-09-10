@@ -40,7 +40,10 @@ app.get("/test/:q", (req, res) => {
 
 app.get("/search/:track", (req, res) => {
 	network.search(req.query.num || 25, req.params.track)
-	  .then((d) => res.send({status: "OK", data: d}))
+	  .then((d) => {return {status: "OK", data: d}})
+	  .then(JSON.stringify)
+	  .then((t) => t.replace(/[^\x00-\x7F]+/g, ""))
+	  .then((d) => res.send(d))
 	  .catch(abort(res))
 })
 
