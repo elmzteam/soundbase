@@ -21,7 +21,7 @@ networkManager.prototype = {
 				let [first, second] = edge.songs
 			        let connector = track == first ? second : first;
 
-				promises.push(this.db.songs.find({id: connector}, {_id: 0}))
+				promises.push(this.db.songs.findOne({id: connector}, {_id: 0}))
 			}
 
 		  	return Promise.all(promises)

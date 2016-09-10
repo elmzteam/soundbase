@@ -13,6 +13,7 @@ soundcloud.init({
 })
 
 var app = express();
+app.use("/static", express.static(__dirname + "/static"))
 
 var abort = (res) => (e) => {
 	res.status(503).send({status: "ERROR"});
@@ -41,8 +42,6 @@ app.get("/test/:q", (req, res) => {
 app.get("/search/:track", (req, res) => {
 	network.search(req.query.num || 25, req.params.track)
 	  .then((d) => {return {status: "OK", data: d}})
-	  .then(JSON.stringify)
-	  .then((t) => t.replace(/[^\x00-\x7F]+/g, ""))
 	  .then((d) => res.send(d))
 	  .catch(abort(res))
 })
