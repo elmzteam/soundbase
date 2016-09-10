@@ -23,6 +23,7 @@ app.get("/return", (req, res) => {
 	var code = req.query.code;
 
 	soundcloud.authorize(code)
+	  .then((token) => logger.log(`Received token ${token}`))
 	  .then(() => res.send({status: "OK"}))
 	  .catch(abort(res))
 })
