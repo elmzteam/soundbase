@@ -11,15 +11,24 @@ let networkManager = function(soundcloud, db) {
 
 networkManager.prototype = {
 	_dbSearch: function(num, track) {
-		return this.db.songs.find({
-			id: {$not: {$eq: track}}, 
-			adjacent: track}, 
-		{id: 0, adjacent: 0}).limit(2*num)
-		  .then((songs) => {
+		return this.db.edges.find({
+			songs: track
+		}).limit(2*num)
+		  .then((edges) => {
+			let promises = []
+			for (let edge of edges) {
+				let [first, second] = edge.songs
+			        let connector = track == first ? second : first;
+
+				promises.push(this.db.songs.find({id: connector}, {_id: 0}))
+			}
+
+		  	return Promise.all(promises)
+		}).then((songs) => {
 			songs = shuffle(songs)
 			let base = Math.floor(num/2)
 			return songs.slice(0, base + Math.floor(Math.random() * (num - base)))
-		  })
+		})
 	},
 	search: function (num, track) {
 		let cachedStore = {}
@@ -46,29 +55,25 @@ networkManager.prototype = {
 		}).then((faves) => {
 			let trackSet = new Set();
 			let objs = {}
+			let promises = []
 			for (let i = 0; trackSet.size < num && i < num; i++) {
 				for (let fav of faves) {
 					if (i >= fav.length) continue;
-					if (trackSet.size >= num) return [trackSet, objs];
+					if (fav[i].id == track) continue
+					if (trackSet.size >= num) return Promise.all(promises);
 					trackSet.add(fav[i].id);
-					objs[fav[i].id] = {
+					let obj = {
 						id: fav[i].id,
 						stream_url: fav[i].stream_url,
 						artwork_url: fav[i].artwork_url,
 						title: fav[i].title,
 						description: fav[i].description, 
 					}
+					promises.push(that.db.songs.update({id: fav[i].id}, {$set: obj}, {upsert: true})
+					  .then(() => that.db.edges.findOne({songs: {$all: [track, fav[i].id]}, user: fav[i].user.id}))
+					  .then((e) => e ? null : that.db.edges.insert({songs: [track, fav[i].id], user: fav[i].user.id}))
+					  .then(() => obj))
 				}
-			}
-			return [trackSet, objs]
-		}).then(([trackSet, objs]) => {
-			let promises = [];
-			let mongoSet = [...trackSet]
-			for (let id of mongoSet) {	
-				promises.push(that.db.songs.update({id: id}, {$set: objs[id], $addToSet: {
-					adjacent: track,
-				}}, {upsert: true})
-				  .then(() => objs[id]))
 			}
 			return Promise.all(promises)
 		}).then((d) => cachedStore.concat(d))
