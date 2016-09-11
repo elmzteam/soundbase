@@ -2,7 +2,7 @@ var soundcloud    = require("./soundcloud")
 var express       = require("express")
 var logger        = require("beautiful-log")
 var mongo         = require("promised-mongo")
-var pixl          = require("pixl-mail");
+var cp            = require("child-process")
 
 var db            = mongo("soundbase")
 var network       = require("./network")(soundcloud, db)
@@ -66,26 +66,17 @@ app.post("/save", (req, res) => {
 });
 
 app.post("/email", (req, res) => {
-	var mail = new pixl();
-	mail.send(`To: ${req.body}
-From: ELMZ Team
-Subject: Your Soundscape Likes
-
-Hey there,
+	let message = `Hey there,
 
 We hope you enjoyed the Soundscape demo.  Here are the tracks you picked:
 
 ${prev.join("\n")}
 
-Thanks!`,
-	(err) => {
-		if (err) {
-			res.status(400).send();
-			console.error(err);
-		} else {
-			res.status(200).send();
-		}
-	});
+Thanks!`;
+
+	message = message.replace('"', '\\"');
+
+	cp.exec(`cat "${message}" | mail -s "Your Soundscape Tracks" ${req.body}`);
 });
 
 function search(number, track) {
