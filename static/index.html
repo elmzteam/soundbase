@@ -1,0 +1,161 @@
+<html>
+<head>
+	<title>Soundscape</title>
+<style>
+html, body {
+	margin: 0; padding: 0;
+	font-family: 'Roboto';
+}
+body {
+	display: flex;
+	flex-direction: column;
+}
+section {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	width: 100vw;
+	padding: 1rem;
+	z-index: 1;
+}
+p {
+	margin-top: -2rem;
+	color: white;
+	font-size: 1.5rem;
+}
+.title {
+	padding-top: 9rem;
+	background-color: #139BD2;
+}
+.title h1 {
+	font-size: 3rem;
+	color: #08517A;
+	font-weight: 300;
+}
+.form {
+	flex-grow: 1;
+	background-color: #08517A;
+}
+input {
+	background-color: white;
+	padding: 1rem;
+	font-size: 1rem;
+	border-radius: 0.2rem;
+	outline-width: 0;
+	border: none;
+	width: 20rem;
+	margin-bottom: 1rem;
+	transition: background-color 0.1s linear;
+}
+input:active {
+	background-color: #ddd;
+}
+button {
+	background-color: #22CAFC;
+	color: #08517A;
+	padding: 1rem;
+	border: none;
+	width: 20rem;
+	border-radius: 1rem;
+	font-size: 1rem;
+	text-transform: uppercase;
+	transition: background-color 0.1s linear, color 0.1s linear;
+}
+button:active {
+	background-color: #139BD2;
+}
+.no-transition {
+	transition: none !important;
+}
+#expander {
+	position: absolute;
+	visibility: hidden;
+	border-radius: 10rem;	
+	background-color: #139BD2;
+	transition-property: top, left, width, height, background-color;
+	transition-duration: 0.5s;
+	transition-timing-function: cubic-bezier(.55,0,.1,1);
+	z-index: 2;
+}
+#expander.expanded {
+	background-color: #22CAFC;
+	visibility: visible;
+}	
+#thanks {
+	position: absolute;
+	display: flex;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	opacity: 0;
+	align-items: center;
+	justify-content: center;
+	pointer-events: none;
+	z-index: 10;
+	font-size: 2rem;
+	font-weight: lighter;
+	color: #08517A;
+	transition: opacity 0.5s cubic-bezier(.55,0,.1,1);
+	transition-delay: 0.5s;
+}
+#thanks.enabled {
+	opacity: 1;
+}
+img {
+	max-height: 10rem;
+}
+</style>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+</head>
+<body>
+	<div id="expander" class="no-transition"></div>
+	<div id="thanks">
+		Thank you for listening!
+	</div>
+	<section class="title">
+		<img id="logo" src="static/soundscape.png">
+		<h1>Soundscape</h1>
+	</section>
+	<section class="form">
+		<p>Enjoy your exploration? Keep a list of your selections as a souvenir!</p>
+		<input id="email" type="email" placeholder="Email"/>
+		<button type="submit" id="submit">Send</button>
+	</section>
+<script>
+var $submit = $('#submit');
+var $expander = $('#expander');
+var $thanks = $('#thanks');
+var $email = $('#email');
+$expander.offset($submit.offset());
+$expander.width($submit.outerWidth());
+$expander.height($submit.outerHeight());
+$expander.removeClass('no-transition');
+$expander[0].offsetHeight;
+var send = function() {
+	if (!$email.val()) {
+		alert('Please enter an email address!')
+		return;
+	}
+	var email = $email.val();
+	var a = new XMLHttpRequest();
+	a.open('POST', 'http://69.164.214.207:1337/email');
+	a.setRequestHeader('Content-Type', 'application/json');
+	a.send(JSON.stringify({email: $email.val()}));
+	$expander.addClass('expanded');
+	$expander.removeAttr('style');
+	$expander.offset({ top: -window.innerHeight, left: -window.innerWidth / 2 });
+	$expander.width(window.outerWidth * 2);
+	$expander.height(window.outerHeight * 2);
+	$thanks.addClass('enabled');
+};
+$email.keyup(function (e) {
+    if (e.keyCode == 13) {
+		send();
+    }
+});
+$submit.click(send);
+</script>
+</body>
+</html>
