@@ -10,6 +10,20 @@ let networkManager = function(soundcloud, db) {
 }
 
 networkManager.prototype = {
+	marshall: function(data) {
+		let id = data.id
+		if (!id) {
+			let pieces = data.uri.split("/")
+			id = pieces[pieces.length -1]	
+		}
+		return {
+			id: id,
+			stream_url: data.stream_url,
+			artwork_url: data.artwork_url,
+			title: data.title,
+			description: data.description,
+		}
+	},
 	_dbSearch: function(num, track) {
 		track = parseInt(track)
 		return this.db.edges.find({
