@@ -19,7 +19,8 @@ soundcloud.init({
 var app = express();
 app.use(bodyparser.json());
 app.use("/static", express.static(__dirname + "/static"))
-app.get("/", (req, res) => res.sendFile(join(__dirname, "static", "index.html");
+
+app.get("/", (req, res) => res.sendFile(join(__dirname, "static", "index.html"));
 
 var abort = (res) => (e) => {
 	res.status(503).send({status: "ERROR"});
