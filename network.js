@@ -17,11 +17,11 @@ networkManager.prototype = {
 			id = pieces[pieces.length -1]	
 		}
 		return {
-			id: id,
-			stream_url: data.stream_url,
-			artwork_url: data.artwork_url,
-			title: data.title,
-			description: data.description,
+			id: id || 0,
+			stream_url: data.stream_url || "",
+			artwork_url: data.artwork_url || "",
+			title: data.title || "",
+			description: data.description || "",
 		}
 	},
 	_dbSearch: function(num, track) {
