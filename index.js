@@ -36,7 +36,7 @@ app.get("/auth", (req, res) => {
 app.get("/query/:q", (req, res) => {
 	soundcloud.get("/tracks?q="+req.params.q)
 	  .then((data) => data.map(network.marshall))
-	  .then((d) => res.send({data: d}))
+	  .then((d) => res.send({status: "OK", data: d}))
 	  .catch(abort(res))
 })
 
@@ -47,7 +47,7 @@ app.get("/search/:track", (req, res) =>
 
 app.get("/sample", (req, res) =>
 	sample(parseInt(req.query.num) || 25)
-	  .then((data) => res.send(data))
+	  .then((data) => res.send({status: "OK", data: data}))
 	  .catch(abort(res)));
 
 function search(number, track) {
