@@ -1,10 +1,10 @@
-var soundcloud = require("./soundcloud")
-var express    = require("express")
-var logger     = require("beautiful-log")
-var mongo      = require("promised-mongo")
+var soundcloud    = require("./soundcloud")
+var express       = require("express")
+var logger        = require("beautiful-log")
+var mongo         = require("promised-mongo")
 
-var db         = mongo("soundbase")
-var network    = require("./network")(soundcloud, db)
+var db            = mongo("soundbase")
+var network       = require("./network")(soundcloud, db)
 
 soundcloud.init({
 	id: "c83cb321de3b21b1ca4435fb5913a3c2",

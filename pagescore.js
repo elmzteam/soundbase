@@ -2,6 +2,7 @@ var soundcloud = require("./soundcloud")
 var express    = require("express")
 var logger     = require("beautiful-log")
 var mongo      = require("promised-mongo")
+var PriorityQueue = require("es-collections").PriorityQueue
 
 var db         = mongo("soundbase")
 var network    = require("./network")(soundcloud, db)
@@ -16,28 +17,32 @@ var gen_id = function(num) {
 	return Math.floor(Math.random() * 216506041)
 }
 
-let queue = []
+let pq = new PriorityQueue((a, b) => a.val - b.val)
 let count = 0
 
 var loop = function() {
 	let active;
-	if (queue.length == 0 || Math.random() < 0.1) {
-		queue = []	
+	if (pq.size == 0 || pq.size > 100000) {
+		pq = new PriorityQueue((a, b) => a.val - b.val)
 		active = gen_id()
 	} else {
-		active = queue.unshift()
+		active = pq.remove().id
 	}
 
 	return network.search(100, active)
 	  .then((set) => {
 		count += set.length	  
 		for (let s of set) {
-			queue.push(s.id)
+			pq.add({ val: Math.random(), id: s.id })
 		}
 	  	return loop()
 	  })
 	  .catch(loop)
 }
 
-setInterval( () => console.log(`Current Indexed: ${count}`), 60000)
+let start = Date.now()
+setInterval(() => {
+	let spent = (Date.now() - start) / 1000;
+	console.log(`Current Indexed: ${count} (${(count/spent).toFixed(4)} tracks/sec)`);
+}, 5000)
 loop()
