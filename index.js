@@ -2,11 +2,13 @@ var soundcloud    = require("./soundcloud")
 var express       = require("express")
 var logger        = require("beautiful-log")
 var mongo         = require("promised-mongo")
-var cp            = require("child_process")
 var bodyparser    = require("body-parser");
+var nodemailer    = require('nodemailer');
 
 var db            = mongo("soundbase")
 var network       = require("./network")(soundcloud, db)
+
+var transport = nodemailer.createTransport("smtps://soundscapepennapps%40gmail.com:daydreamop@smtp.gmail.com");
 
 soundcloud.init({
 	id: "c83cb321de3b21b1ca4435fb5913a3c2",
@@ -53,7 +55,7 @@ app.get("/sample", (req, res) =>
 	  .then((data) => res.send({status: "OK", data: data}))
 	  .catch(abort(res)));
 
-var prev = ["a", "b", "c"];
+var prev = [];
 var current = [];
 
 app.post("/start", (req, res) => {
@@ -63,22 +65,36 @@ app.post("/start", (req, res) => {
 });
 
 app.post("/save", (req, res) => {
-	current.push(req.body.message);
+	current.push(req.body);
 	res.status(200).send();
 });
 
 app.post("/email", (req, res) => {
-	let message = `Hey there,
+	console.log(prev);
+	let message = `<p>Hey there,</p>
 
-We hope you enjoyed the Soundscape demo.  Here are the tracks you picked:
+<p>We hope you enjoyed the Soundscape demo.  Here are the tracks you picked:<p>
+<ul>
+${prev.map((track) => `<li><a href=${track.url}>${track.title}</a></li>`).join("\n")}
+</ul>
+<p>Thanks for checking us out!</p>`;
 
-${prev.join("\n")}
+	let options = {
+		from: "Soundscape Team <soundscapepennapps@gmail.com>",
+		to: req.body.email,
+		subject: "Your Soundscape Tracks",
+		html: message
+	};
 
-Thanks!`;
-
-	message = message.replace('"', '\\"');
-
-	cp.exec(`cat "${message}" | mail -s "Your Soundscape Tracks" ${req.body.email}`);
+	transport.sendMail(options, (err, info) => {
+		if (err) {
+			res.status(500).send();
+			console.error(err);
+			return;
+		}
+		console.log("Email sent.");
+		res.status(200).send();
+	})
 });
 
 function search(number, track) {
