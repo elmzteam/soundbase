@@ -2,6 +2,7 @@ var soundcloud    = require("./soundcloud")
 var express       = require("express")
 var logger        = require("beautiful-log")
 var mongo         = require("promised-mongo")
+var pixl          = require("pixl-mail");
 
 var db            = mongo("soundbase")
 var network       = require("./network")(soundcloud, db)
@@ -49,6 +50,43 @@ app.get("/sample", (req, res) =>
 	sample(parseInt(req.query.num) || 25)
 	  .then((data) => res.send(data))
 	  .catch(abort(res)));
+
+var prev = ["a", "b", "c"];
+var current = [];
+
+app.post("/start", (req, res) => {
+	prev = current;
+	current = [];
+	res.status(200).send();
+});
+
+app.post("/save", (req, res) => {
+	current.push(req.body);
+	res.status(200).send();
+});
+
+app.post("/email", (req, res) => {
+	var mail = new pixl();
+	mail.send(`To: ${req.body}
+From: ELMZ Team
+Subject: Your Soundscape Likes
+
+Hey there,
+
+We hope you enjoyed the Soundscape demo.  Here are the tracks you picked:
+
+${prev.join("\n")}
+
+Thanks!`,
+	(err) => {
+		if (err) {
+			res.status(400).send();
+			console.error(err);
+		} else {
+			res.status(200).send();
+		}
+	});
+});
 
 function search(number, track) {
 	return network.search(number, track)

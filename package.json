@@ -13,6 +13,7 @@
     "es-collections": "0.0.2",
     "express": "^4.14.0",
     "node-soundcloud": "0.0.5",
+    "pixl-mail": "^1.0.6",
     "promised-mongo": "^1.2.0"
   }
 }
