@@ -66,7 +66,7 @@ app.post("/start", (req, res) => {
 
 app.post("/save", (req, res) => {
 	const {url} = req.body;
-	soundcloud.get(url.substring(url.indexOf("tracks"), url.indexOf("stream") - 1))
+	soundcloud.get(`/${url.substring(url.indexOf("tracks"), url.indexOf("stream") - 1)}`)
 	  .then(({title: title, permalink_url: url}) => {
 		current.push({title, url});
 		res.status(200).send();
