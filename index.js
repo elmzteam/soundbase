@@ -33,8 +33,10 @@ app.get("/auth", (req, res) => {
 	res.redirect(soundcloud.getConnectUrl());
 })
 
-app.get("/test/:q", (req, res) => {
+app.get("/query/:q", (req, res) => {
 	soundcloud.get("/tracks?q="+req.params.q)
+	  .then((data) => data.map(network.marshall))
+	  
 	  .then((d) => res.send({data: d}))
 	  .catch(abort(res))
 })
