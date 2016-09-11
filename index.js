@@ -65,11 +65,12 @@ app.post("/start", (req, res) => {
 });
 
 app.post("/save", (req, res) => {
-	soundcloud.get(req.body.url.substring(req.body.url.indexOf("tracks"), req.body.url.indexOf("stream") - 1))
+	const {url} = req.body;
+	soundcloud.get(url.substring(url.indexOf("tracks"), url.indexOf("stream") - 1))
 	  .then(({title: title, permalink_url: url}) => {
 		current.push({title, url});
 		res.status(200).send();
-	  });
+	  }).catch(abort(res));
 });
 
 app.post("/email", (req, res) => {
