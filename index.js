@@ -36,16 +36,34 @@ app.get("/auth", (req, res) => {
 app.get("/query/:q", (req, res) => {
 	soundcloud.get("/tracks?q="+req.params.q)
 	  .then((data) => data.map(network.marshall))
-	  
 	  .then((d) => res.send({data: d}))
 	  .catch(abort(res))
 })
 
-app.get("/search/:track", (req, res) => {
-	network.search(req.query.num || 25, req.params.track)
-	  .then((d) => {return {status: "OK", data: d}})
-	  .then((d) => res.send(d))
-	  .catch(abort(res))
-})
+app.get("/search/:track", (req, res) =>
+	search(parseInt(req.query.num) || 25, req.params.track)
+	  .then((data) => res.send(data))
+	  .catch(abort(res)));
+
+app.get("/sample", (req, res) =>
+	sample(parseInt(req.query.num) || 25)
+	  .then((data) => res.send(data))
+	  .catch(abort(res)));
+
+function search(number, track) {
+	return network.search(number, track)
+	  .then((d) => {
+	  	if (d.length > 0) {
+	  		return d;
+	  	} else {
+	  		return sample(25);
+	  	}
+	  })
+	  .then((d) => ({ status: "OK", data: d }))
+}
+
+function sample(size) {
+	return db.songs.aggregate({ $sample: { size }});
+}
 
 app.listen(1337)
