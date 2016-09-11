@@ -2,7 +2,8 @@ var soundcloud    = require("./soundcloud")
 var express       = require("express")
 var logger        = require("beautiful-log")
 var mongo         = require("promised-mongo")
-var cp            = require("child-process")
+var cp            = require("child_process")
+var bodyparser    = require("body-parser");
 
 var db            = mongo("soundbase")
 var network       = require("./network")(soundcloud, db)
@@ -14,6 +15,7 @@ soundcloud.init({
 })
 
 var app = express();
+app.use(bodyparser.json());
 app.use("/static", express.static(__dirname + "/static"))
 
 var abort = (res) => (e) => {
@@ -61,7 +63,7 @@ app.post("/start", (req, res) => {
 });
 
 app.post("/save", (req, res) => {
-	current.push(req.body);
+	current.push(req.body.message);
 	res.status(200).send();
 });
 
@@ -76,7 +78,7 @@ Thanks!`;
 
 	message = message.replace('"', '\\"');
 
-	cp.exec(`cat "${message}" | mail -s "Your Soundscape Tracks" ${req.body}`);
+	cp.exec(`cat "${message}" | mail -s "Your Soundscape Tracks" ${req.body.email}`);
 });
 
 function search(number, track) {
