@@ -22,7 +22,7 @@ let count = 0
 
 var loop = function() {
 	let active;
-	if (pq.size == 0 || pq.size > 100000) {
+	if (pq.size == 0 || pq.size > 10000) {
 		pq = new PriorityQueue((a, b) => a.val - b.val)
 		active = gen_id()
 	} else {
